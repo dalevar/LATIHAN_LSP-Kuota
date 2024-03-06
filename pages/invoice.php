@@ -1,14 +1,34 @@
 <?php
 require '../data.php'; //mengambil data dari file data.php
-if (isset($_POST['beli'])) { //mengecek apakah form sudah di submit
-    $id = $_GET['id']; //mengambil nilai id yang dikirim dari product yang dipilih
-    $product = $_POST['product']; //mengambil nilai product yang dikirim dari product yang dipilih
-    $harga = $_POST['harga']; //mengambil nilai harga yang dikirim dari product yang dipilih
-    $total = $_POST['total']; //mengambil nilai total yang dikirim dari product yang dipilih
-    $topping = $_POST['topping']; //mengambil nilai topping yang dikirim dari product yang dipilih
-    $harga_topping = $_POST['harga_topping']; //mengambil nilai harga_topping yang dikirim dari product yang dipilih
-    $total_harga = $_POST['total_harga']; //mengambil nilai total_harga yang dikirim dari product yang dipilih
+if (isset($_GET['id'])) {
+    $id = $_GET['id'];
+
+    // Retrieve other form data using $_POST
+    $harga_Product = $_POST['harga_Product'];
+    $harga_Topping = $_POST['harga_Topping'];
+    $product = $kuota[$id]['kuota_judul'];
+    $total = $harga_Product + $harga_Topping;
+
+    // Retrieve selected toppings
+    $selectedToppings = isset($_POST['topping']) ? $_POST['topping'] : [];
+
+    // Create an array to store topping information
+    $toppingDetails = [];
+
+    // Loop through selected toppings and store their details
+    foreach ($selectedToppings as $selectedTopping) {
+        foreach ($topping as $t) {
+            if ($t['harga'] == $selectedTopping) {
+                $toppingDetails[] = $t['paket'] . " - " . $t['waktu'] . " - Rp. " . number_format($t['harga'], 0);
+                break; // Break the loop once a match is found
+            }
+        }
+    }
+
+    // Concatenate topping details
+    $selectedToppings = implode("<br>", $toppingDetails);
 }
+
 
 session_start();
 //session start untuk mengecek apakah user telah login, jika belum maka akan dilempat ke halaman login kembali
@@ -16,6 +36,7 @@ if (!isset($_SESSION['username'])) {
     header("Location: login.php");
 }
 ?>
+
 <!doctype html>
 <html lang="en">
 
@@ -40,7 +61,6 @@ if (!isset($_SESSION['username'])) {
                     <table class="table">
                         <thead>
                             <tr>
-                                <th scope="col" width="12%">Nomor Product</th>
                                 <th scope="col">Nama Product</th>
                                 <th scope="col">Harga Product</th>
                                 <th scope="col">Topping</th>
@@ -49,40 +69,45 @@ if (!isset($_SESSION['username'])) {
                         </thead>
                         <tbody>
                             <tr>
-                                <th scope="row">1</th>
-                                <td>Mark</td>
-                                <td>Otto</td>
-                                <td>@mdo</td>
-                                <td>@mdo</td>
+                                <td><?= $product ?></td>
+                                <td>Rp.<?= number_format($harga_Product, 0)  ?></td>
+                                <td><?= $selectedToppings ?></td>
+                                <td>Rp. <?= number_format($harga_Topping, 0) ?></td>
                             </tr>
                         </tbody>
                     </table>
 
-                    <div class="col-lg-6 col-md-6 col-sm-6 mt-4">
-                        <table>
+                    <div class="col-lg-6 col-md-6 col-sm-6 mt-4" style="padding-bottom: 2em;">
+                        <table class="mb-3">
                             <tbody>
                                 <tr>
                                     <td>Nama Product</td>
                                     <td>:</td>
+                                    <td><?= $product ?></td>
                                 </tr>
                                 <tr>
                                     <td>Harga Product</td>
                                     <td>:</td>
+                                    <td>Rp.<?= number_format($harga_Product, 0)  ?></td>
                                 </tr>
                                 <tr>
                                     <td>Topping</td>
                                     <td>:</td>
+                                    <td><?= $selectedToppings ?></td>
                                 </tr>
                                 <tr>
                                     <td>Harga Topping</td>
                                     <td>:</td>
+                                    <td>Rp. <?= number_format($harga_Topping, 0) ?></td>
                                 </tr>
-                                <tr>
+                                <tr class="fw-bold">
                                     <td>Total Keseluruhan</td>
                                     <td>:</td>
+                                    <td>Rp.<?= number_format($total, 0)  ?></td>
                                 </tr>
                             </tbody>
                         </table>
+                        <a href="success.php" class="btn text-light" style="background-color: #0C145A;">Continue</a>
                     </div>
 
                 </div>
